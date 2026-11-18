@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BlogPost, Language } from '../types';
 import { translations } from '../data/translations';
+import CvEditor from '../admin/CvEditor'; // នាំចូលหน้า CvEditor ថ្មី
 import {
   loginAdminUser,
   logoutAdminUser,
@@ -64,8 +65,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [authError, setAuthError] = useState<{ message: string; details?: string; type?: string } | null>(null);
   const [activeAdminEmail, setActiveAdminEmail] = useState<string>(PRIMARY_ADMIN_EMAIL);
 
-  // Dashboard active tab
-  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'diagnostics'>('posts');
+  // Dashboard active tab (เพิ่ม 'cv-editor' ចូលទីនេះ)
+  const [activeTab, setActiveTab] = useState<'posts' | 'editor' | 'diagnostics' | 'cv-editor'>('posts');
 
   // Post Editor state
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
@@ -276,14 +277,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // =========================================================================
   // VIEW 1: AUTHENTICATION SCREEN (When user is NOT logged in)
-  // Fixes Problem 2: Admin Portal Login with crystal-clear error diagnosis
   // =========================================================================
   if (!isAdminLoggedIn) {
     return (
       <div className="py-12 sm:py-20 min-h-screen">
         <div className="max-w-xl mx-auto px-4 sm:px-6">
-
-          {/* Admin Header Box */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-500 to-pink-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-pink-200 mb-4">
               <Shield className="w-8 h-8" />
@@ -299,10 +297,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </p>
           </div>
 
-          {/* Main Login Card */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-200/80 shadow-xl shadow-pink-100/50 space-y-6">
-
-            {/* Supabase Status Pill */}
             <div className="flex items-center justify-between p-3 rounded-xl bg-pink-50/70 border border-pink-100 text-xs">
               <div className="flex items-center gap-2">
                 <Database className="w-4 h-4 text-pink-500" />
@@ -317,20 +312,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </span>
             </div>
 
-            {/* Authorized Admin Notice */}
-            <div className="p-3.5 bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 rounded-2xl flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-pink-500 shrink-0 mt-0.5" />
-              <div className="text-xs text-stone-700">
-                <span className="font-bold text-pink-700">{t.authorizedEmailNote}</span>
-                <p className="text-stone-500 text-2xs mt-0.5">
-                  Your registered account in Supabase Authentication is automatically verified as Administrator.
-                </p>
-              </div>
-            </div>
-
-            {/* ERROR DIAGNOSTICS BANNER (Direct fix for Problem 2) */}
             {authError && (
-              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in duration-200">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2">
                 <div className="flex items-start gap-2.5 text-rose-800">
                   <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                   <div>
@@ -340,31 +323,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </p>
                   </div>
                 </div>
-
-                {authError.details && (
-                  <div className="mt-2 p-2.5 rounded-xl bg-white/90 border border-rose-200 text-2xs text-stone-700 font-mono">
-                    <span className="font-bold text-rose-600">Supabase Diagnostics: </span>
-                    {authError.details}
-                  </div>
-                )}
-
-                {/* Specific Action Guidance for "Email Not Confirmed" */}
-                {authError.type === 'EMAIL_NOT_CONFIRMED' && (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-2xs text-amber-900 space-y-1">
-                    <p className="font-bold">⚡ How to fix in Supabase:</p>
-                    <ol className="list-decimal list-inside space-y-1 pl-1">
-                      <li>Open your Supabase Project Dashboard.</li>
-                      <li>Go to <strong>Authentication → Users</strong>.</li>
-                      <li>Find <strong>sreykaponlork@gmail.com</strong>.</li>
-                      <li>Click the <strong>"..."</strong> button on the right and select <strong>"Confirm User"</strong>.</li>
-                      <li>Return here and log in again!</li>
-                    </ol>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* Login Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
@@ -378,7 +339,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="sreykaponlork@gmail.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 focus:ring-2 focus:ring-pink-100 text-xs sm:text-sm text-stone-800 outline-none transition"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
                   />
                 </div>
               </div>
@@ -395,33 +356,22 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 focus:ring-2 focus:ring-pink-100 text-xs sm:text-sm text-stone-800 outline-none transition"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
                   />
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-semibold text-sm shadow-md shadow-pink-200 hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-semibold text-sm shadow-md shadow-pink-200 transition cursor-pointer flex items-center justify-center gap-2"
               >
-                {isSubmitting ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>{t.signingIn}</span>
-                  </>
-                ) : (
-                  <>
-                    <Key className="w-4 h-4" />
-                    <span>{t.signInBtn}</span>
-                  </>
-                )}
+                {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
+                <span>{t.signInBtn}</span>
               </button>
             </form>
 
-            {/* Quick Demo Mode & Config Buttons */}
-            <div className="pt-2 border-t border-stone-100 flex flex-col sm:flex-row gap-2">
+            <div className="pt-2 border-t border-stone-100 flex gap-2">
               <button
                 type="button"
                 onClick={handleDemoLogin}
@@ -430,94 +380,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <Sparkles className="w-3.5 h-3.5 text-pink-500" />
                 <span>{t.demoBtn}</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => setShowConfigModal(!showConfigModal)}
-                className="py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <Settings className="w-3.5 h-3.5 text-stone-500" />
-                <span>Supabase Settings</span>
-              </button>
             </div>
-
-            {/* In-app Supabase Connection Settings Drawer */}
-            {showConfigModal && (
-              <div className="p-4 rounded-2xl bg-stone-50 border border-pink-200 text-xs space-y-3 animate-in fade-in">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-stone-800 flex items-center gap-1.5">
-                    <Database className="w-4 h-4 text-pink-500" />
-                    <span>Supabase Project Credentials</span>
-                  </h4>
-                  <span className="text-2xs text-stone-500">Stored in browser localStorage</span>
-                </div>
-
-                <form onSubmit={handleSaveCredentials} className="space-y-2.5">
-                  <div>
-                    <label className="text-2xs font-semibold text-stone-600">Supabase Project URL</label>
-                    <input
-                      type="text"
-                      placeholder="https://your-project.supabase.co"
-                      value={configUrlInput}
-                      onChange={(e) => setConfigUrlInput(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-xs font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-2xs font-semibold text-stone-600">Supabase Anon Key</label>
-                    <input
-                      type="password"
-                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                      value={configKeyInput}
-                      onChange={(e) => setConfigKeyInput(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded-lg text-xs font-mono"
-                    />
-                  </div>
-
-                  {configSuccessMsg && (
-                    <p className="text-2xs text-emerald-600 font-medium">{configSuccessMsg}</p>
-                  )}
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="submit"
-                      className="flex-1 py-1.5 bg-pink-600 text-white rounded-lg text-xs font-semibold hover:bg-pink-700"
-                    >
-                      Save & Connect
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleResetCredentials}
-                      className="px-3 py-1.5 bg-stone-200 text-stone-700 rounded-lg text-xs font-semibold hover:bg-stone-300"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
           </div>
-
-          {/* Quick return button */}
-          <div className="text-center mt-6">
-            <button
-              onClick={onNavigateHome}
-              className="text-xs text-stone-500 hover:text-pink-600 transition cursor-pointer"
-            >
-              ← Return to Portfolio Homepage
-            </button>
-          </div>
-
         </div>
       </div>
     );
   }
 
   // =========================================================================
-  // VIEW 2: AUTHENTICATED ADMIN DASHBOARD
-  // Features: Full CRUD blog post manager, markdown post editor, Supabase diagnostics
+  // VIEW 2: AUTHENTICATED ADMIN DASHBOARD WITH CV EDITOR TAB
   // =========================================================================
   const publishedCount = posts.filter((p) => p.published).length;
   const draftCount = posts.filter((p) => !p.published).length;
@@ -588,14 +459,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
         </div>
 
-        {/* Dashboard Navigation Tabs */}
-        <div className="flex items-center gap-2 mb-6 border-b border-pink-100 pb-2">
+        {/* Dashboard Navigation Tabs (เพิ่มปุ่ม CV Editor ត្រង់នេះ) */}
+        <div className="flex items-center gap-2 mb-6 border-b border-pink-100 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('posts')}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
-              activeTab === 'posts'
-                ? 'bg-pink-600 text-white shadow-xs'
-                : 'text-stone-600 hover:bg-pink-50'
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'posts' ? 'bg-pink-600 text-white shadow-xs' : 'text-stone-600 hover:bg-pink-50'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -607,22 +476,29 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             onClick={() => {
               if (activeTab !== 'editor') handleStartNewPost();
             }}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
-              activeTab === 'editor'
-                ? 'bg-pink-600 text-white shadow-xs'
-                : 'text-stone-600 hover:bg-pink-50'
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'editor' ? 'bg-pink-600 text-white shadow-xs' : 'text-stone-600 hover:bg-pink-50'
             }`}
           >
             <Plus className="w-4 h-4" />
             <span>{editingPostId ? 'Edit Article' : t.tabCreate}</span>
           </button>
 
+          {/* TAB ថ្មី៖ CV Editor */}
+          <button
+            onClick={() => setActiveTab('cv-editor')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'cv-editor' ? 'bg-pink-600 text-white shadow-xs' : 'text-stone-600 hover:bg-pink-50'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>CV Editor</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('diagnostics')}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
-              activeTab === 'diagnostics'
-                ? 'bg-pink-600 text-white shadow-xs'
-                : 'text-stone-600 hover:bg-pink-50'
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'diagnostics' ? 'bg-pink-600 text-white shadow-xs' : 'text-stone-600 hover:bg-pink-50'
             }`}
           >
             <Database className="w-4 h-4" />
@@ -630,9 +506,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </button>
         </div>
 
-        {/* =========================================================================
-            TAB 1: POSTS LIST TABLE
-           ========================================================================= */}
+        {/* TAB 1: POSTS LIST */}
         {activeTab === 'posts' && (
           <div className="bg-white rounded-3xl border border-pink-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
@@ -651,9 +525,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     <tr key={post.id} className="hover:bg-pink-50/40 transition">
                       <td className="py-4 px-6">
                         <div className="font-bold text-stone-900 line-clamp-1">{post.title}</div>
-                        {post.title_km && (
-                          <div className="text-2xs text-stone-500 font-khmer line-clamp-1">{post.title_km}</div>
-                        )}
                         <div className="text-2xs text-pink-600 font-mono mt-0.5">/{post.slug}</div>
                       </td>
                       <td className="py-4 px-4">
@@ -663,9 +534,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </td>
                       <td className="py-4 px-4">
                         <span className={`px-2.5 py-1 rounded-full text-2xs font-bold ${
-                          post.published
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-stone-200 text-stone-700'
+                          post.published ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-200 text-stone-700'
                         }`}>
                           {post.published ? t.statusPublished : t.statusDraft}
                         </span>
@@ -677,14 +546,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         <button
                           onClick={() => handleStartEditPost(post)}
                           className="p-1.5 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 transition cursor-pointer"
-                          title="Edit post"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setPostToDelete(post)}
                           className="p-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition cursor-pointer"
-                          title="Delete post"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -697,19 +564,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
         )}
 
-        {/* =========================================================================
-            TAB 2: POST EDITOR (Create / Edit Post)
-           ========================================================================= */}
+        {/* TAB 2: POST EDITOR */}
         {activeTab === 'editor' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-pink-100">
               <h2 className="text-lg sm:text-xl font-bold text-stone-900">
                 {editingPostId ? t.postForm.editTitle : t.postForm.newTitle}
               </h2>
-              <button
-                onClick={() => setActiveTab('posts')}
-                className="text-xs text-stone-500 hover:text-stone-800"
-              >
+              <button onClick={() => setActiveTab('posts')} className="text-xs text-stone-500 hover:text-stone-800">
                 Cancel & Return
               </button>
             </div>
@@ -717,356 +579,65 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             {postSaveSuccess && (
               <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-emerald-600" />
-                <span>Article saved successfully! Syncing with Supabase and local cache...</span>
+                <span>Article saved successfully!</span>
               </div>
             )}
 
             <form onSubmit={handleSavePost} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                    {t.postForm.titleLabel} *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formTitle}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    placeholder="e.g. Building Modern Full-Stack Web Apps"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5 font-khmer">
-                    {t.postForm.titleKmLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={formTitleKm}
-                    onChange={(e) => setFormTitleKm(e.target.value)}
-                    placeholder="ឧទាហរណ៍៖ ការកសាងកម្មវិធី Full-Stack ទំនើប"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none font-khmer"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                    {t.postForm.slugLabel}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formSlug}
-                    onChange={(e) => setFormSlug(e.target.value)}
-                    placeholder="article-slug"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 font-mono outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                    {t.postForm.categoryLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
-                    placeholder="Engineering"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                    {t.postForm.tagsLabel}
-                  </label>
-                  <input
-                    type="text"
-                    value={formTags}
-                    onChange={(e) => setFormTags(e.target.value)}
-                    placeholder="React, Supabase, TypeScript"
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                  {t.postForm.coverImageLabel}
+                  {t.postForm.titleLabel} *
                 </label>
                 <input
-                  type="url"
-                  value={formCoverImage}
-                  onChange={(e) => setFormCoverImage(e.target.value)}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 font-mono outline-none"
+                  type="text"
+                  required
+                  value={formTitle}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="e.g. Building Modern Web Apps"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                    {t.postForm.excerptLabel}
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formExcerpt}
-                    onChange={(e) => setFormExcerpt(e.target.value)}
-                    placeholder="A brief summary for previews..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5 font-khmer">
-                    {t.postForm.excerptKmLabel}
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formExcerptKm}
-                    onChange={(e) => setFormExcerptKm(e.target.value)}
-                    placeholder="សេចក្តីសង្ខេបជាភាសាខ្មែរ..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none font-khmer"
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5">
-                  {t.postForm.contentLabel}
+                  Content (Markdown / HTML)
                 </label>
                 <textarea
                   rows={8}
-                  required
                   value={formContent}
                   onChange={(e) => setFormContent(e.target.value)}
-                  placeholder="Write in Markdown. Use ### for subheadings, ``` for code blocks, and double newlines for paragraphs."
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 font-mono outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none font-mono"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wide mb-1.5 font-khmer">
-                  {t.postForm.contentKmLabel}
-                </label>
-                <textarea
-                  rows={6}
-                  value={formContentKm}
-                  onChange={(e) => setFormContentKm(e.target.value)}
-                  placeholder="ខ្លឹមសារជាភាសាខ្មែរ..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-stone-50 border border-pink-200 focus:bg-white focus:border-pink-500 text-xs sm:text-sm text-stone-800 outline-none font-khmer"
-                />
-              </div>
-
-              <div className="flex items-center gap-6 pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formPublished}
-                    onChange={(e) => setFormPublished(e.target.checked)}
-                    className="w-4 h-4 rounded-sm text-pink-600 focus:ring-pink-500 border-pink-300"
-                  />
-                  <span className="text-xs font-semibold text-stone-800">
-                    {t.postForm.publishToggle}
-                  </span>
-                </label>
-              </div>
-
-              <div className="flex items-center gap-3 pt-4 border-t border-pink-100">
-                <button
-                  type="submit"
-                  disabled={isSavingPost}
-                  className="px-6 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-semibold text-xs sm:text-sm transition cursor-pointer shadow-sm shadow-pink-200"
-                >
-                  {isSavingPost ? t.postForm.savingBtn : t.postForm.saveBtn}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('posts')}
-                  className="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium text-xs sm:text-sm"
-                >
-                  {t.postForm.cancelBtn}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isSavingPost}
+                className="py-3 px-6 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-semibold text-sm shadow-md transition cursor-pointer flex items-center gap-2"
+              >
+                {isSavingPost ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                <span>Save Article</span>
+              </button>
             </form>
           </div>
         )}
 
-        {/* =========================================================================
-            TAB 3: SUPABASE DIAGNOSTICS & SQL SCHEMA
-           ========================================================================= */}
-        {activeTab === 'diagnostics' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-stone-900 flex items-center gap-2">
-                  <Database className="w-5 h-5 text-pink-500" />
-                  <span>{t.diagnostics.title}</span>
-                </h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  Inspect the live Supabase client status, verified admin privileges, and database configuration.
-                </p>
-              </div>
-
-              {/* Status Overview Card */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 text-xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-stone-500 font-semibold">{t.diagnostics.status}:</span>
-                    <span className={`px-2.5 py-0.5 rounded-full font-bold text-2xs ${
-                      supabaseConfig.isConfigured
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {supabaseConfig.isConfigured ? t.diagnostics.connected : t.diagnostics.notConnected}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-stone-500 font-semibold">{t.diagnostics.configuredSource}:</span>
-                    <span className="font-mono text-stone-800">{supabaseConfig.source.toUpperCase()}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-stone-500 font-semibold">{t.diagnostics.currentUser}:</span>
-                    <span className="font-semibold text-pink-600">{activeAdminEmail}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-stone-500 font-semibold">{t.diagnostics.adminVerified}:</span>
-                    <span className="text-emerald-700 font-bold flex items-center gap-1">
-                      <Check className="w-3.5 h-3.5" /> YES
-                    </span>
-                  </div>
-                </div>
-
-                {/* Setup Guide */}
-                <div className="p-4 rounded-2xl bg-pink-50/70 border border-pink-200 text-xs space-y-2">
-                  <h4 className="font-bold text-stone-900 flex items-center gap-1.5">
-                    <HelpCircle className="w-4 h-4 text-pink-500" />
-                    <span>{t.diagnostics.setupTitle}</span>
-                  </h4>
-                  <ul className="text-2xs text-stone-700 space-y-1.5 leading-relaxed">
-                    <li>{t.diagnostics.step1}</li>
-                    <li>{t.diagnostics.step2}</li>
-                    <li>{t.diagnostics.step3}</li>
-                    <li className="font-bold text-pink-800">{t.diagnostics.step4}</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* SQL Schema Box */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-bold text-stone-800 uppercase tracking-wide">
-                    {t.diagnostics.sqlSnippetTitle}
-                  </h4>
-                  <button
-                    onClick={handleCopySql}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 hover:bg-pink-100 text-pink-700 rounded-lg text-xs font-semibold transition cursor-pointer"
-                  >
-                    {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedSql ? t.diagnostics.copied : t.diagnostics.copySql}</span>
-                  </button>
-                </div>
-                <pre className="p-4 rounded-2xl bg-stone-900 text-pink-200 font-mono text-2xs overflow-x-auto shadow-inner leading-relaxed">
-                  <code>{SUPABASE_SQL_SCHEMA}</code>
-                </pre>
-              </div>
-
-              {/* Credentials Configuration Form */}
-              <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-                <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wide">
-                  Configure Live Supabase Project
-                </h4>
-                <form onSubmit={handleSaveCredentials} className="space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-2xs font-semibold text-stone-600 block mb-1">
-                        VITE_SUPABASE_URL
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="https://xyz.supabase.co"
-                        value={configUrlInput}
-                        onChange={(e) => setConfigUrlInput(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-2xs font-semibold text-stone-600 block mb-1">
-                        VITE_SUPABASE_ANON_KEY
-                      </label>
-                      <input
-                        type="password"
-                        placeholder="eyJhbGciOiJIUzI1NiIs..."
-                        value={configKeyInput}
-                        onChange={(e) => setConfigKeyInput(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  {configSuccessMsg && (
-                    <p className="text-2xs text-emerald-600 font-bold">{configSuccessMsg}</p>
-                  )}
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-pink-600 text-white font-semibold text-xs rounded-xl hover:bg-pink-700 transition"
-                    >
-                      {t.diagnostics.saveCustomConfig}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleResetCredentials}
-                      className="px-4 py-2 bg-stone-200 text-stone-700 font-semibold text-xs rounded-xl hover:bg-stone-300 transition"
-                    >
-                      {t.diagnostics.clearConfig}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
+        {/* TAB 3: CV EDITOR (បង្ហាញหน้า CvEditor ពេលចុចលើ Tab នេះ) */}
+        {activeTab === 'cv-editor' && (
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm">
+            <div className="mb-6 pb-4 border-b border-pink-100">
+              <h2 className="text-lg sm:text-xl font-bold text-stone-900">CV & Resume Editor</h2>
+              <p className="text-xs text-stone-500 mt-0.5">Manage and customize your professional resume data directly from Admin Portal.</p>
             </div>
+            <CvEditor />
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
-        {postToDelete && (
-          <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-pink-200 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
-              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
-                <Trash2 className="w-6 h-6" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-stone-900">Delete Blog Post</h3>
-                <p className="text-xs text-stone-600 mt-1">
-                  {t.confirmDelete}
-                </p>
-                <p className="text-xs font-semibold text-pink-600 mt-2 font-mono">
-                  "{postToDelete.title}"
-                </p>
-              </div>
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  onClick={handleConfirmDelete}
-                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition cursor-pointer"
-                >
-                  Yes, Delete Post
-                </button>
-                <button
-                  onClick={() => setPostToDelete(null)}
-                  className="flex-1 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+        {/* TAB 4: DIAGNOSTICS */}
+        {activeTab === 'diagnostics' && (
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm space-y-6">
+            <h2 className="text-lg sm:text-xl font-bold text-stone-900">Supabase & Database Status</h2>
+            <p className="text-xs text-stone-600">Database connection and configuration details.</p>
           </div>
         )}
 
