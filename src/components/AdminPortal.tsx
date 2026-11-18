@@ -16,13 +16,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onReturnHome }) => {
       
       {/* Left Sidebar Menu */}
       <aside className="w-64 bg-white border-r border-stone-200 flex flex-col shrink-0 hidden md:flex">
-        {/* Brand Header */}
+        {/* Brand Header - Ponlork Sreyka */}
         <div className="p-6 border-b border-stone-100 flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-pink-600 flex items-center justify-center text-white font-bold shadow-sm">
-            P
+            PS
           </div>
           <div>
-            <h1 className="font-bold text-stone-900 text-sm tracking-wide">PORCHING.</h1>
+            <h1 className="font-bold text-stone-900 text-sm tracking-wide">PONLORK SREYKA</h1>
             <p className="text-[10px] text-stone-500 tracking-wider font-medium">ADMIN PANEL</p>
           </div>
         </div>
@@ -30,7 +30,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onReturnHome }) => {
         {/* Navigation Links */}
         <nav className="flex-1 p-4 space-y-1.5 text-sm overflow-y-auto">
           
-          {/* Dashboard (Active Pill Style) */}
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl font-medium transition cursor-pointer ${
@@ -189,7 +188,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onReturnHome }) => {
           {activeTab === 'dashboard' && (
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-4">
               <h2 className="text-xl font-bold text-stone-900">Dashboard Overview</h2>
-              <p className="text-sm text-stone-500">Welcome to your admin panel, ណុប ស្រីកា! Select any menu from the left sidebar to manage your website content.</p>
+              <p className="text-sm text-stone-500">Welcome to your admin panel, Ponlork Sreyka! Select any menu from the left sidebar to manage your website content.</p>
             </div>
           )}
 
